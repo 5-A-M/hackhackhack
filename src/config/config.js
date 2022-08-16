@@ -1,0 +1,1 @@
+export const SERVER_URL= "https://hackhackhack123.herokuapp.com"
