@@ -61,11 +61,9 @@ const Room = (props) => {
     <Fragment>
       <HeaderIndex />
       <Wrapper>
-        {isBrowser === true && (
-          <BrowserView className="djkdklkslaska" style={{ width: 200 }}>
-            <Formular setIdFormular={setIdFormular} {...formular} />
-          </BrowserView>
-        )}
+        
+          <Formular setIdFormular={setIdFormular} {...formular} />
+          
         <Predict setCallAgain={setCallAgain} resultFormular={formular?.result?.filter(item=> parseInt(item.id) === parseInt(idFormular))} idFormular={idFormular} {...table} />
       </Wrapper>
     </Fragment>
