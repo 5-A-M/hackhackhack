@@ -5,10 +5,11 @@ import ResultBet from "./ResultBet";
 import Stats from "./Stats";
 import TableEachRound from "./TableEachRound";
 import TypeBet from "./TypeBet";
-import { useLocation } from "react-router-dom"
+import { useLocation } from "react-router-dom";
+import usePrevious from "../CustomHook/usePrevious";
 
 const Predict = (props) => {
-  const location= useLocation()
+  const location = useLocation();
   return (
     <div
       className="sjdasjasjasasas"
@@ -19,8 +20,8 @@ const Predict = (props) => {
         flexWrap: "wrap",
       }}
     >
-      <Table1 {...props} rate={location?.state?.rate || "Đang tính toán"} />
-      <Table2 {...props} rate={location?.state?.rate || "Đang tính toán"} />
+      <Table1 {...props} rate={location?.state?.rate || "Đang tính toán "} />
+      <Table2 {...props} rate={location?.state?.rate || "Đang tính toán "} />
     </div>
   );
 };
@@ -47,7 +48,7 @@ export const Table1 = (props) => {
             text1={"Dự đoán ván mới"}
             text2={
               <TypeBet
-                className="djkasdhakjshakskls"
+                className={valueString?.[props?.results?.length]?.length > 0 ? "djkasdhakjshakskls" : "fjdksjkjkhdshjkdshjkds"}
                 className2={`djkasdhakjshakskls jfklsdejkleaoiawawawa ${
                   valueString?.[props?.results?.length]?.toLowerCase() === "p"
                     ? "dsdjajdhskdhjkeewaw"
@@ -59,14 +60,27 @@ export const Table1 = (props) => {
                 } ${
                   valueString?.[props?.results?.length]?.toLowerCase() === "t"
                     ? "tiroaklsklaskajkadsa"
-                    : ""
+                    : "hfaksdhjklsdjhukdhsuiea"
                 }`}
-                predict={valueString?.[props?.results?.length]}
+                predict={valueString?.[props?.results?.length]?.length > 0 ? valueString?.[props?.results?.length] : <div style={{fontSize: 16, color: "#000"}}>Vui lòng chọn công thức</div>}
               />
             }
           />
         </InnerTable>
-        <MainPredict setCallAgain={props.setCallAgain} {...props} />
+        {/*  */}
+        <div
+          className="dskjlsahjsjaksas"
+          style={{
+            height: "500px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            position: "relative",
+          }}
+        >
+          <MainPredict setCallAgain={props.setCallAgain} {...props} />
+        </div>
+        {/*  */}
         <ResultBet {...props} />
         <TableEachRound />
         <Stats />
@@ -106,31 +120,48 @@ const PercentWin = (props) => {
 };
 
 const MainPredict = (props) => {
+  const previousResult = usePrevious(props.results);
   const fake_sleep = (ms) => new Promise((rel) => setTimeout(rel, ms));
   const [waitPredict, setWaitPredict] = useState(() => "");
-  const [countDown, setCountDown] = useState(() => 30);
+  const [countDown, setCountDown] = useState(() => 20);
   useEffect(() => {
+    const callApi = () =>
+      setInterval(() => {
+        props.setCallAgain((prev) => !prev);
+        if (props.result?.length > previousResult) {
+          setWaitPredict(() => "");
+          setCountDown(() => 20);
+          clearInterval(callApi);
+        }
+      }, 3000);
     const interval = setInterval(async () => {
       setCountDown((prev) => parseInt(prev - 1));
       if (parseInt(countDown) <= 0) {
         setCountDown((prev) => 0);
         setWaitPredict(() => "Chờ một chút");
-        await fake_sleep(5000);
-        props.setCallAgain((prev) => !prev);
-        setWaitPredict(() => "");
-        setCountDown(() => 30);
+        callApi();
       }
     }, 1000);
     return () => clearInterval(interval);
-    
-  }, [countDown, props]);
+  }, [countDown, props, previousResult]);
+
   return (
     <InnerTable className="jklsajsijasasdsdaws">
-      <Div
-        className="djskdjaksjaadsada"
-        onClick={() => {}}
-        text={waitPredict.length > 0 ? waitPredict : countDown}
-      />
+      <div
+        className="sdajklsjaskjasksa"
+        style={{
+          position: "absolute",
+          top: 0,
+          left: "50%",
+          transform: "translateX(-50%)",
+        }}
+      >
+        <Div
+          className="djskdjaksjaadsada"
+          onClick={() => {}}
+          text={waitPredict.length > 0 ? waitPredict : countDown}
+        />
+      </div>
       <InnerTable className="sghahsjakshkjassasasaas dssdfdsdasasassaas">
         {Array.from(Array(72).keys()).map((item, key) => (
           <TypeBet
@@ -141,7 +172,7 @@ const MainPredict = (props) => {
           />
         ))}
         <div
-          className="fddsshjkidsjdklsda"
+          className="fddsshjkidsjdklsda dhsjhdjalkyahuwaha"
           style={{
             width: "100%",
             height: "100%",
@@ -171,7 +202,7 @@ const MainPredict = (props) => {
 //
 //
 
-export const Table2 = (props) => {
+export const Table2 = memo((props) => {
   return (
     <div
       className="djsdsahjhfjkfhjsdasas"
@@ -186,15 +217,24 @@ export const Table2 = (props) => {
     >
       <InnerTable>
         <Header text={"Đồ thị"} />
-        <MainChart {...props} />
+        {props?.resultFormular?.length > 0 ? (
+          <MainChart {...props} />
+        ) : (
+          <div
+            className="fjhkdhjasksjaksas"
+            style={{ textAlign: "center", margin: "16px 0" }}
+          >
+            Vui lòng chọn công thức để xem biểu đồ
+          </div>
+        )}
       </InnerTable>
       {/*  */}
       <StatsBet {...props} />
     </div>
   );
-};
+});
 
-const MainChart = (props) => {
+const MainChart = memo((props) => {
   return (
     <div className="sjaksjakldjksasa" style={{ width: "100%", padding: 10 }}>
       <TitleChart />
@@ -202,7 +242,7 @@ const MainChart = (props) => {
       <FooterChart />
     </div>
   );
-};
+});
 
 const TitleChart = (props) => {
   return (
@@ -221,7 +261,7 @@ const TitleChart = (props) => {
   );
 };
 
-const StatsBet = (props) => {
+const StatsBet = memo((props) => {
   return (
     <div
       className="dkaldjsakjasas"
@@ -282,7 +322,7 @@ const StatsBet = (props) => {
       </InnerTable>
     </div>
   );
-};
+});
 
 const Percent = (props) => {
   return (
@@ -324,7 +364,7 @@ const A1 = (props) => {
   );
 };
 
-const A2 = (props) => {
+const A2 = memo((props) => {
   return (
     <div
       className="dsjhkshjvdlkjdsljkfsdj"
@@ -339,9 +379,9 @@ const A2 = (props) => {
       <PercentBar {...props} />
     </div>
   );
-};
+});
 
-const PercentBar = (props) => {
+const PercentBar = memo((props) => {
   return (
     <div
       className="djfsdjkldhsjaksaklas"
@@ -356,7 +396,7 @@ const PercentBar = (props) => {
       }}
     ></div>
   );
-};
+});
 
 //
 //
@@ -367,44 +407,36 @@ const MainMainChart = memo((props) => {
   const [B, setB] = useState(() => []);
   const [T, setT] = useState(() => []);
   useEffect(() => {
-    if(props?.results?.length > 0) {
-      let a= 1021
-      const p= []
-      const b= []
-      const t= []
-      props?.results?.map((item, key)=> {
-        if(parseInt(key) === 0) {
-          if(item.toLowerCase() === "p") {
-            p.push(a)
+    if (props?.results?.length > 0 && props?.resultFormular?.length > 0) {
+      let a = 1021;
+      const win = [];
+      const loss = [];
+      const arrayFormular = props?.resultFormular?.[0]?.valueString?.replaceAll(
+        ",",
+        ""
+      );
+      props?.results?.map((item, key) => {
+        if (parseInt(key) === 0) {
+          if (item.toLowerCase() === arrayFormular?.[parseInt(key)]) {
+            win.push(a);
+          } else if (item.toLowerCase() !== arrayFormular?.[parseInt(key)]) {
+            loss.push(a);
           }
-          else if(item.toLowerCase() === "b") {
-            b.push(a)
-          }
-          else if(item.toLowerCase() === "t") {
-            t.push(a)
-          }
-        }
-        else {
-          if(item.toLowerCase() === "p") {
-            a+= 61
-            p.push(a)
-          }
-          else if(item.toLowerCase() === "b") {
-            a-= 59
-            b.push(a)
-          }
-          else if(item.toLowerCase() === "t") {
-            a+= 1
-            t.push(a)
+        } else {
+          if (item.toLowerCase() === arrayFormular?.[parseInt(key)]) {
+            a += 61;
+            win.push(a);
+          } else if (item.toLowerCase() !== arrayFormular?.[parseInt(key)]) {
+            a -= 59;
+            loss.push(a);
           }
         }
-        setP(()=> p)
-        setB(()=> b)
-        setT(()=> t)
-        return 0
-      })
+        setP(() => win);
+        setB(() => loss);
+        return 0;
+      });
     }
-  }, [props.results]);
+  }, [props.results, props?.resultFormular]);
   return (
     <div
       className="dsjkhjksahjkladas"
@@ -443,7 +475,13 @@ const MainMainChart = memo((props) => {
                 parseInt(key) + 1 <= 1080 && parseInt(key) + 1 > 1020
                   ? "3px"
                   : "1px",
-              background: P.includes(parseInt(key) + 1) ? "blue" : B.includes(parseInt(key) + 1) ? "red" : T.includes(parseInt(key) + 1) ? "green" : "#fff",
+              background: P.includes(parseInt(key) + 1)
+                ? "blue"
+                : B.includes(parseInt(key) + 1)
+                ? "red"
+                : T.includes(parseInt(key) + 1)
+                ? "green"
+                : "#fff",
             }}
           ></li>
         ))}
