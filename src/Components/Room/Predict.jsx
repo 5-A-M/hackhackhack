@@ -163,7 +163,7 @@ const MainPredict = (props) => {
         />
       </div>
       <InnerTable className="sghahsjakshkjassasasaas dssdfdsdasasassaas">
-        {Array.from(Array(72).keys()).map((item, key) => (
+        {Array.from(Array(80).keys()).map((item, key) => (
           <TypeBet
             index={item}
             className="dsjkajskjskalawas"
@@ -186,7 +186,7 @@ const MainPredict = (props) => {
             <div
               key={key}
               className="dhjkkladskladkasdsasa"
-              style={{ width: 28, height: 28, padding: 1 }}
+              style={{ width: 20, height: 20, padding: 1 }}
             >
               {item === "P" && <PBT background={"blue"} text={"P"} />}
               {item === "B" && <PBT background={"red"} text={"B"} />}
